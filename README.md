@@ -49,6 +49,9 @@ Output:
 
 Fail `render.yaml` sudah disediakan untuk auto deploy dari GitHub.
 
+One-click:
+- `https://render.com/deploy?repo=https://github.com/lapflex3/ewallet-crypto-ai`
+
 ### Aliran auto deploy
 
 1. Push repo ke GitHub.
