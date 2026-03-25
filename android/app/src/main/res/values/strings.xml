@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EwalletCryptoAI</string>
+    <string name="title_activity_main">EwalletCryptoAI</string>
+    <string name="package_name">com.nasadef.ewallet.cryptoai</string>
+    <string name="custom_url_scheme">com.nasadef.ewallet.cryptoai</string>
+</resources>

@@ -1,0 +1,13 @@
+{
+  "users": [],
+  "sessions": [],
+  "transactions": [],
+  "subscriptions": [],
+  "trades": [],
+  "deposits": [],
+  "withdrawals": [],
+  "settings": {
+    "fxRates": {},
+    "spotPrices": {}
+  }
+}

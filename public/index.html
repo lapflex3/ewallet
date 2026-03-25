@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0369a1" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <title>Ewallet Crypto AI</title>
+  <style>
+    :root {
+      --bg: #f3f7ff;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0369a1;
+      --ok: #166534;
+      --warn: #92400e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top right, #e0f2fe 0%, var(--bg) 45%, #e2e8f0 100%);
+      padding: 20px;
+    }
+    h1, h2 { margin: 0 0 8px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select, button, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { opacity: 0.92; }
+    pre {
+      background: #0b1020;
+      color: #c9d8ff;
+      padding: 10px;
+      border-radius: 10px;
+      min-height: 70px;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .hint { color: var(--muted); font-size: 12px; }
+    .pill {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0c4a6e;
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ewallet Crypto + AI Trading</h1>
+  <p class="hint">MVP: deposit/withdraw, exchange MYR, trading, subscription AI berdasarkan email whitelist atau bayaran BCH/BTC.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Auth</h2>
+      <label>Email</label>
+      <input id="email" placeholder="email@contoh.com" />
+      <label>Password</label>
+      <input id="password" type="password" placeholder="minimum 6" />
+      <label>Nama</label>
+      <input id="name" placeholder="Nama pengguna" />
+      <div class="row">
+        <button onclick="register()">Register</button>
+        <button onclick="login()">Login</button>
+      </div>
+      <button onclick="loadMe()">Refresh Profile</button>
+      <pre id="meOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Wallet</h2>
+      <div class="row">
+        <div>
+          <label>Method</label>
+          <select id="method">
+            <option>CIMB</option>
+            <option>MAYBANK</option>
+            <option>TNG</option>
+            <option>DEBIT_CARD</option>
+            <option>VISA</option>
+            <option>MASTERCARD</option>
+          </select>
+        </div>
+        <div>
+          <label>Currency</label>
+          <select id="currency">
+            <option>MYR</option>
+            <option>USDT</option>
+            <option>BTC</option>
+            <option>BCH</option>
+          </select>
+        </div>
+      </div>
+      <label>Amount</label>
+      <input id="walletAmount" type="number" step="0.00000001" value="100" />
+      <label>Destination (untuk withdraw)</label>
+      <input id="destination" placeholder="acc no / wallet / notes" />
+      <div class="row">
+        <button onclick="deposit()">Deposit</button>
+        <button onclick="withdrawNow()">Withdraw</button>
+      </div>
+      <pre id="walletOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Exchange</h2>
+      <div class="row">
+        <div>
+          <label>From</label>
+          <select id="fromCurrency">
+            <option>MYR</option>
+            <option>USDT</option>
+            <option>BTC</option>
+            <option>BCH</option>
+          </select>
+        </div>
+        <div>
+          <label>To</label>
+          <select id="toCurrency">
+            <option>USDT</option>
+            <option>MYR</option>
+            <option>BTC</option>
+            <option>BCH</option>
+          </select>
+        </div>
+      </div>
+      <label>Amount</label>
+      <input id="exchangeAmount" type="number" step="0.00000001" value="100" />
+      <div class="row">
+        <button onclick="quoteExchange()">Quote</button>
+        <button onclick="executeExchange()">Execute</button>
+      </div>
+      <pre id="exchangeOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Trading</h2>
+      <span class="pill">Pairs: BTCUSDT, BCHUSDT</span>
+      <span class="pill">BUY amount=USDT</span>
+      <span class="pill">SELL amount=coin qty</span>
+      <label>Symbol</label>
+      <select id="symbol">
+        <option>BTCUSDT</option>
+        <option>BCHUSDT</option>
+      </select>
+      <label>Side</label>
+      <select id="side">
+        <option>BUY</option>
+        <option>SELL</option>
+      </select>
+      <label>Amount</label>
+      <input id="tradeAmount" type="number" step="0.00000001" value="50" />
+      <button onclick="placeOrder()">Place Order</button>
+      <pre id="tradeOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>AI Trading Access</h2>
+      <p class="hint">Whitelist percuma: lapflex100@gmail.com, nikrazif@nasadef.com.my, laptoprazif@gmail.com</p>
+      <label>Package</label>
+      <select id="pkg">
+        <option value="beginner">Beginner (0.5 BCH)</option>
+        <option value="advance">Advance (1.0 BCH)</option>
+        <option value="intermediate">Intermediate (2.0 BCH)</option>
+      </select>
+      <label>Network</label>
+      <select id="network">
+        <option>BCH</option>
+        <option>BTC</option>
+      </select>
+      <div class="row">
+        <button onclick="quoteSubscription()">Get Payment Quote</button>
+        <button onclick="statusAi()">Status AI Access</button>
+      </div>
+      <label>txHash</label>
+      <input id="txHash" placeholder="contoh tx hash" />
+      <label>Amount Paid</label>
+      <input id="amountPaid" type="number" step="0.00000001" value="0.5" />
+      <button onclick="confirmSubscription()">Confirm Payment</button>
+      <div class="row">
+        <button onclick="getSignal()">Get AI Signal</button>
+        <button onclick="loadHistory()">History</button>
+      </div>
+      <pre id="aiOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Admin Console</h2>
+      <p class="hint">Hanya role <code>admin</code> boleh akses endpoint ini.</p>
+      <div class="row">
+        <button onclick="adminOverview()">Overview</button>
+        <button onclick="adminUsers()">Senarai Users</button>
+      </div>
+      <div class="row">
+        <button onclick="adminTransactions()">Transactions</button>
+        <button onclick="adminSettings()">Settings</button>
+      </div>
+      <label>Update FX Rate (contoh: MYR_USDT=0.21)</label>
+      <input id="fxKey" placeholder="MYR_USDT" />
+      <input id="fxValue" type="number" step="0.00000001" placeholder="0.21" />
+      <button onclick="updateFxRate()">Update FX Rate</button>
+      <pre id="adminOut"></pre>
+    </section>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token') || '';
+
+    function headers() {
+      const h = { 'Content-Type': 'application/json' };
+      if (token) h.Authorization = `Bearer ${token}`;
+      return h;
+    }
+
+    async function callApi(url, method = 'GET', body) {
+      const res = await fetch(url, {
+        method,
+        headers: headers(),
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const text = await res.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (_e) {
+        data = { message: text };
+      }
+      if (!res.ok) throw data;
+      return data;
+    }
+
+    function show(id, data) {
+      document.getElementById(id).textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function register() {
+      try {
+        const data = await callApi('/api/auth/register', 'POST', {
+          email: email.value,
+          password: password.value,
+          name: name.value
+        });
+        token = data.token;
+        localStorage.setItem('token', token);
+        show('meOut', data);
+      } catch (e) { show('meOut', e); }
+    }
+
+    async function login() {
+      try {
+        const data = await callApi('/api/auth/login', 'POST', {
+          email: email.value,
+          password: password.value
+        });
+        token = data.token;
+        localStorage.setItem('token', token);
+        show('meOut', data);
+      } catch (e) { show('meOut', e); }
+    }
+
+    async function loadMe() {
+      try { show('meOut', await callApi('/api/me')); }
+      catch (e) { show('meOut', e); }
+    }
+
+    async function deposit() {
+      try {
+        show('walletOut', await callApi('/api/wallet/deposit', 'POST', {
+          method: method.value,
+          amount: Number(walletAmount.value),
+          currency: currency.value
+        }));
+      } catch (e) { show('walletOut', e); }
+    }
+
+    async function withdrawNow() {
+      try {
+        show('walletOut', await callApi('/api/wallet/withdraw', 'POST', {
+          method: method.value,
+          amount: Number(walletAmount.value),
+          currency: currency.value,
+          destination: destination.value
+        }));
+      } catch (e) { show('walletOut', e); }
+    }
+
+    async function quoteExchange() {
+      try {
+        show('exchangeOut', await callApi('/api/exchange/quote', 'POST', {
+          fromCurrency: fromCurrency.value,
+          toCurrency: toCurrency.value,
+          amount: Number(exchangeAmount.value)
+        }));
+      } catch (e) { show('exchangeOut', e); }
+    }
+
+    async function executeExchange() {
+      try {
+        show('exchangeOut', await callApi('/api/exchange/execute', 'POST', {
+          fromCurrency: fromCurrency.value,
+          toCurrency: toCurrency.value,
+          amount: Number(exchangeAmount.value)
+        }));
+      } catch (e) { show('exchangeOut', e); }
+    }
+
+    async function placeOrder() {
+      try {
+        show('tradeOut', await callApi('/api/trading/order', 'POST', {
+          symbol: symbol.value,
+          side: side.value,
+          amount: Number(tradeAmount.value)
+        }));
+      } catch (e) { show('tradeOut', e); }
+    }
+
+    async function statusAi() {
+      try { show('aiOut', await callApi('/api/ai-trading/status')); }
+      catch (e) { show('aiOut', e); }
+    }
+
+    async function quoteSubscription() {
+      try {
+        show('aiOut', await callApi('/api/subscriptions/quote', 'POST', {
+          packageKey: pkg.value,
+          network: network.value
+        }));
+      } catch (e) { show('aiOut', e); }
+    }
+
+    async function confirmSubscription() {
+      try {
+        show('aiOut', await callApi('/api/subscriptions/confirm', 'POST', {
+          packageKey: pkg.value,
+          network: network.value,
+          txHash: txHash.value,
+          amountPaid: Number(amountPaid.value)
+        }));
+      } catch (e) { show('aiOut', e); }
+    }
+
+    async function getSignal() {
+      try { show('aiOut', await callApi('/api/ai-trading/signal?symbol=BTCUSDT&timeframe=1h&risk=medium')); }
+      catch (e) { show('aiOut', e); }
+    }
+
+    async function loadHistory() {
+      try { show('aiOut', await callApi('/api/history')); }
+      catch (e) { show('aiOut', e); }
+    }
+
+    async function adminOverview() {
+      try { show('adminOut', await callApi('/api/admin/overview')); }
+      catch (e) { show('adminOut', e); }
+    }
+
+    async function adminUsers() {
+      try { show('adminOut', await callApi('/api/admin/users')); }
+      catch (e) { show('adminOut', e); }
+    }
+
+    async function adminTransactions() {
+      try { show('adminOut', await callApi('/api/admin/transactions')); }
+      catch (e) { show('adminOut', e); }
+    }
+
+    async function adminSettings() {
+      try { show('adminOut', await callApi('/api/admin/settings')); }
+      catch (e) { show('adminOut', e); }
+    }
+
+    async function updateFxRate() {
+      try {
+        const key = (fxKey.value || '').trim().toUpperCase();
+        const value = Number(fxValue.value);
+        show('adminOut', await callApi('/api/admin/settings', 'PUT', {
+          fxRates: { [key]: value }
+        }));
+      } catch (e) { show('adminOut', e); }
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

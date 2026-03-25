@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ewallet-crypto-ai
+    env: node
+    plan: free
+    region: singapore
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: Super Admin
+      - key: BTC_PER_BCH
+        value: 0.0066

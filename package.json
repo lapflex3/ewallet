@@ -1,0 +1,59 @@
+{
+  "name": "ewallet-crypto-ai",
+  "version": "1.0.0",
+  "description": "Crypto ewallet, trading, exchanger MYR with AI trading access control",
+  "author": "Nasadef",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "desktop/main.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build:webapp": "node scripts/build-webapp.js",
+    "build:exe": "npm run build:webapp && electron-builder --win portable nsis",
+    "build:linux": "npm run build:webapp && electron-builder --linux AppImage deb",
+    "build:desktop": "npm run build:webapp && electron-builder",
+    "android:init": "npx cap add android",
+    "build:apk": "npm run build:webapp && node scripts/sync-android-assets.js && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "electron": "^31.2.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.nasadef.ewallet.cryptoai",
+    "productName": "EwalletCryptoAI",
+    "directories": {
+      "output": "dist/desktop"
+    },
+    "files": [
+      "desktop/**/*",
+      "src/**/*",
+      "public/**/*",
+      "data/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    }
+  }
+}
